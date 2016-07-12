@@ -1,0 +1,57 @@
+https://developer.paypal.com/webapps/developer/docs/integration/web/accept-paypal-payment/
+
+*1. Oauth Request*
+	
+curl https://api.sandbox.paypal.com/v1/oauth2/token \
+ -H "Accept: application/json" \
+ -H "Accept-Language: en_US" \
+ -u "ATtFMvtP1oNvDjpEsJFmlr10tObOJDGEuhESVlSbs8WlI1uUzby36SXSEaAm2ZRBnttlGuP91Pq2QtzL:ENuD9HUgT0ldpMjeU6qDyRuS7IQpSQLNzMx55X7BfdYjEnWfeQGRth6pxaY1-J3Lso2IPiWoZ0GOacJT" \
+ -d "grant_type=client_credentials"
+
+
+Response (Access Token):
+{"scope":"https://uri.paypal.com/services/subscriptions https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/vault/credit-card https://uri.paypal.com                                                                                          /services/applications/webhooks openid https://uri.paypal.com/payments/payouts h                                                                                          ttps://api.paypal.com/v1/vault/credit-card/.*","nonce":"2016-02-23T23:10:27ZLw2H                                                                                          vL_VDPfL9q0Ie-x4EO2ZzKV6VbmgtXp9m4Hjj7c","access_token":"A101.Z6A5HzK19LEUyQvpDC                                                                                          avVjNDgEoe7dsjPpgk0McHKcpXGZ79JCk0rFw6r7MTZ7mw.JCKtfvNmigcpq8okLmrBYhEzH0W","tok                                                                                          en_type":"Bearer","app_id":"APP-80W284485P519543T","expires_in":32400}
+
+
+curl -v https://api.sandbox.paypal.com/v1/payments/payment \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Bearer A101.Z6A5HzK19LEUyQvpDCavVjNDgEoe7dsjPpgk0McHKcpXGZ79JCk0rFw6r7MTZ7mw.JCKtfvNmigcpq8okLmrBYhEzH0W' \
+-d '{
+  "intent":"sale",
+  "redirect_urls":{
+    "return_url":"http://www.google.com",
+    "cancel_url":"http://www.yahoo.com"
+  },
+  "payer":{
+    "payment_method":"paypal"
+  },
+  "transactions":[
+    {
+      "amount":{
+        "total":"10.00",
+        "currency":"USD"
+      },
+      "description":"This is the payment transaction description."
+    }
+  ]
+}'
+
+From <https://developer.paypal.com/webapps/developer/docs/integration/web/accept-paypal-payment/> 
+
+
+Response: 
+{"id":"PAY-5D41694096626493EK3GOPWI","intent":"sale","state":"created","payer":{"payment_method":"paypal"},"transactions":[{"amount":{"total":"7.47","currency":"USD"},"description":"This is the payment transaction description.","related_resources":[]}],"create_time":"2016-02-23T23:14:33Z","links":[{"href":"https://api.sandbox.paypal.com/v1/payments/payment/PAY-5D41694096626493EK3GOPWI","rel":"self","method":"GET"},{"href":"https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-2F9963741N3110315","rel":"approval_url","method":"REDIRECT"},{"href":"https://api.sandbox.paypal.com/v1/payments/payment/PAY-5D41694096626493EK3GOPWI/execute","rel":"execute","method":"POST"}]}
+
+
+Response: 
+https://www.google.com/?paymentId=PAY-5D41694096626493EK3GOPWI&token=EC-2F9963741N3110315&PayerID=E8KQX8R9MDP9U&gws_rd=ssl
+
+
+Request: 
+curl -v https://api.sandbox.paypal.com/v1/payments/payment/PAY-54D41694096626493EK3GOPWI/execute/ \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Bearer A101.Z6A5HzK19LEUyQvpDCavVjNDgEoe7dsjPpgk0McHKcpXGZ79JCk0rFw6r7MTZ7mw.JCKtfvNmigcpq8okLmrBYhEzH0W' \
+-d '{ "payer_id" : "E8KQX8R9MDP9U" }'
+
+Response:
+{"id":"PAY-5D41694096626493EK3GOPWI","intent":"sale","state":"approved","cart":"2F9963741N3110315","payer":{"payment_method":"paypal","status":"VERIFIED","payer_info":{"email":"pmatai_buyer@gmail.com","first_name":"Priya","last_name":"Matai","payer_id":"E8KQX8R9MDP9U","shipping_address":{"recipient_name":"Test 200","line1":"3985 n 75 w","city":"hyde park","state":"UT","postal_code":"84318","country_code":"US"},"phone":"4088671387","country_code":"US","billing_address":{"line1":"1 Main St","line2":"","city":"San Jose","state":"CA","postal_code":"95131","country_code":"US"}}},"transactions":[{"amount":{"total":"7.47","currency":"USD","details":{}},"payee":{"merchant_id":"M7YEZXTTGFGLJ"},"description":"This is the payment transaction description.","item_list":{"shipping_address":{"recipient_name":"Test 200","line1":"3985 n 75 w","city":"hyde park","state":"UT","postal_code":"84318","country_code":"US"}},"related_resources":[{"sale":{"id":"0XX36533253967704","state":"completed","amount":{"total":"7.47","currency":"USD","details":{}},"payment_mode":"INSTANT_TRANSFER","protection_eligibility":"ELIGIBLE","protection_eligibility_type":"ITEM_NOT_RECEIVED_ELIGIBLE,UNAUTHORIZED_PAYMENT_ELIGIBLE","transaction_fee":{"value":"0.52","currency":"USD"},"parent_payment":"PAY-5D41694096626493EK3GOPWI","create_time":"2016-02-23T23:26:12Z","update_time":"2016-02-23T23:26:12Z","links":[{"href":"https://api.sandbox.paypal.com/v1/payments/sale/0XX36533253967704","rel":"self","method":"GET"},{"href":"https://api.sandbox.paypal.com/v1/payments/sale/0XX36533253967704/refund","rel":"refund","method":"POST"},{"href":"https://api.sandbox.paypal.com/v1/payments/payment/PAY-5D41694096626493EK3GOPWI","rel":"parent_payment","method":"GET"}]}}]}],"create_time":"2016-02-23T23:26:13Z","links":[{"href":"https://api.sandbox.paypal.com/v1/payments/payment/PAY-5D41694096626493EK3GOPWI","rel":"self","method":"GET"}]}
